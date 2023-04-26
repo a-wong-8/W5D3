@@ -61,7 +61,7 @@ class Questions
     attr_accessor :id, :title, :body, :author_id
 
     def self.all
-        data = QuestionsDatabase.instance.execute("SELECT * FROM users")
+        data = QuestionsDatabase.instance.execute("SELECT * FROM questions")
         data.map { |datum| Questions.new(datum) }
     end
 
@@ -108,7 +108,7 @@ class Questions
   end 
 
   def self.find_by_author_id(author_id)
-    author_id = QuestionsDatabase.instance.execute(<<-SQL, author_id)
+    data = QuestionsDatabase.instance.execute(<<-SQL, author_id)
     SELECT
       *
     FROM
@@ -116,9 +116,10 @@ class Questions
     WHERE
       author_id = ?
     SQL
-    return nil unless author_id.length > 0
+    return nil unless data.length > 0
 
-    Questions.new(author_id.first) 
+    data.map { |question| Questions.new(question) }
+    
   end 
 
   def initialize(options)
@@ -130,12 +131,12 @@ class Questions
 
 end
 
-class QuestionLikes
+class QuestionFollows
   attr_accessor :id, :user_id, :question_id
 
     def self.all
-        data = QuestionsDatabase.instance.execute("SELECT * FROM users")
-        data.map { |datum| QuestionLikes.new(datum) }
+        data = QuestionsDatabase.instance.execute("SELECT * FROM question_follows")
+        data.map { |datum| QuestionFollows.new(datum) }
     end
 
     def self.find_by_id(id)
@@ -143,13 +144,13 @@ class QuestionLikes
         SELECT
           *
         FROM
-          question_likes 
+          question_follows
         WHERE
           id = ?
       SQL
       return nil unless id.length > 0
   
-      QuestionLikes.new(id.first) 
+      QuestionFollows.new(id.first) 
     end
 
     def self.find_by_user_id(user_id)
@@ -157,18 +158,18 @@ class QuestionLikes
         SELECT
           *
         FROM
-          question_likes
+          question_follows
         WHERE
           user_id = ?
       SQL
       return nil unless user_id.length > 0
   
-      QuestionLikes.new(user_id.first) 
+      QuestionFollows.new(user_id.first) 
     end 
 
 
   def self.find_by_question_id(question_id)
-    question_id = QuestionsDatabase.instance.execute(<<-SQL, title)
+    question_id = QuestionsDatabase.instance.execute(<<-SQL, question_id)
     SELECT
       *
     FROM
@@ -178,7 +179,7 @@ class QuestionLikes
     SQL
     return nil unless question_id.length > 0
 
-    QuestionLikes.new(question_id.first) 
+    QuestionFollows.new(question_id.first) 
   end 
 
   def initialize(options)
@@ -193,7 +194,7 @@ class Replies
   attr_accessor :id, :question_id, :parent_reply_id, :author_id, :body 
 
   def self.all
-    data = QuestionsDatabase.instance.execute("SELECT * FROM users")
+    data = QuestionsDatabase.instance.execute("SELECT * FROM replies")
     data.map { |datum| Replies.new(datum) }
 end
 
@@ -227,7 +228,7 @@ end
 
 
   def self.find_by_question_id(question_id)
-    question_id = QuestionsDatabase.instance.execute(<<-SQL, title)
+    question_id = QuestionsDatabase.instance.execute(<<-SQL, question_id)
     SELECT
       *
     FROM
@@ -282,7 +283,7 @@ class QuestionLikes
     attr_accessor :id, :user_id, :question_id
 
     def self.all
-        data = QuestionsDatabase.instance.execute("SELECT * FROM users")
+        data = QuestionsDatabase.instance.execute("SELECT * FROM question_likes")
         data.map { |datum| QuestionLikes.new(datum) }
     end
   
@@ -320,7 +321,7 @@ class QuestionLikes
       SELECT
         *
       FROM
-        questions_follows
+        questions_likes
       WHERE
         question_id = ?
       SQL
@@ -369,7 +370,7 @@ class QuestionTags
     attr_accessor :question_id, :id, :tag_id
 
     def self.all
-        data = QuestionsDatabase.instance.execute("SELECT * FROM users")
+        data = QuestionsDatabase.instance.execute("SELECT * FROM question_tags")
         data.map { |datum| QuestionTags.new(datum) }
     end
 
